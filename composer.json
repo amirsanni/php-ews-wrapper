@@ -1,0 +1,14 @@
+{
+    "name": "amirsanni/php-ews-wrapper",
+    "description": "A simple wrapper around jamesiarmes/php-ews library",
+    "type": "library",
+    "require": {
+        "php-ews/php-ews": "1.0"
+    },
+    "authors": [
+        {
+            "name": "Amir Sanni",
+            "email": "amirsanni@gmail.com"
+        }
+    ]
+}
