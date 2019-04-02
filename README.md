@@ -2,6 +2,10 @@
 A simple wrapper for jamesiarmes/php-ews library
 
 
+# Installation
+composer require amirsanni/php-ews-wrapper
+
+
 # Features
 **Send Email**
 
