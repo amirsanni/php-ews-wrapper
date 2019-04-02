@@ -94,7 +94,7 @@ class PhpEwsWrapper {
     private function __setSender(){
         $sender = new EmailAddressType();
         $sender->EmailAddress = $this->send_as_email ? $this->send_as_email : $this->sender;
-        $sender->Name = $this->sender_name ?? "";
+        $sender->Name = $this->sender_name ? $this->sender_name : "";
 
         $this->msg_obj->From = new SingleRecipientType();
         $this->msg_obj->From->Mailbox = $sender;
