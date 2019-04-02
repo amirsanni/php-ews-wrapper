@@ -2,20 +2,21 @@
     "name": "amirsanni/php-ews-wrapper",
     "description": "A simple wrapper around jamesiarmes/php-ews library",
     "type": "library",
-    "require": {
-        "php-ews/php-ews": "1.0",
-        "php":">=5.4"
-    },
+	"license": "MIT",
+    "keywords":["EWS", "Exchange Web Service", "PHP", "PhpEws", "Microsoft Exchange"],
     "authors": [
         {
             "name": "Amir Sanni",
             "email": "amirsanni@gmail.com"
         }
     ],
+    "require": {
+        "php-ews/php-ews": "1.0",
+        "php":">=5.4"
+    },
     "autoload":{
         "psr-4": {
             "amirsanni\\phpewswrapper\\":"src/"
         }
-    },
-    "keywords":["EWS", "Exchange Web Service", "PHP", "PhpEws", "Microsoft Exchange"]
+    }
 }
