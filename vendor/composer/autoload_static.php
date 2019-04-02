@@ -12,6 +12,10 @@ class ComposerStaticInit5d0baecf2fb718040b34c1c63838cfb6
             'jamesiarmes\\PhpNtlm\\' => 20,
             'jamesiarmes\\PhpEws\\' => 19,
         ),
+        'a' => 
+        array (
+            'amirsanni\\phpewswrapper\\' => 24,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -22,6 +26,10 @@ class ComposerStaticInit5d0baecf2fb718040b34c1c63838cfb6
         'jamesiarmes\\PhpEws\\' => 
         array (
             0 => __DIR__ . '/..' . '/php-ews/php-ews/src',
+        ),
+        'amirsanni\\phpewswrapper\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
         ),
     );
 
