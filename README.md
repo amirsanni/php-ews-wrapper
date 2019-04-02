@@ -6,7 +6,7 @@ A simple wrapper for jamesiarmes/php-ews library
 **Send Email**
 
 
-# Test
+# How to use
 _use amirsanni\phpewswrapper\PhpEwsWrapper;_
 
 _$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');_
