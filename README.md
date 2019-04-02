@@ -15,7 +15,7 @@ _use amirsanni\phpewswrapper\PhpEwsWrapper;_
 
 _$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');_
 
-**Note: Server address defaults to _outlook.office365.com_**
+**Note:** Server address defaults to _outlook.office365.com_
 
 **$mail->sender_name = "SenderName";**  
 **$mail->subject = "Subject";**  
