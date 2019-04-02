@@ -3,7 +3,8 @@
     "description": "A simple wrapper around jamesiarmes/php-ews library",
     "type": "library",
     "require": {
-        "php-ews/php-ews": "1.0"
+        "php-ews/php-ews": "1.0",
+        "php":">=5.4"
     },
     "authors": [
         {
