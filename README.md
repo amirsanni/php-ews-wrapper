@@ -24,7 +24,7 @@ _$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');_
 **$mail->recipient_name = "Amir Sanni";**  
 **$mail->cc = 'String' or [Array];**  
 **$mail->bcc = 'String' or [Array];**  
-**$mail->files = 'String' or [Array];**  
+**$mail->attach = 'String' or [Array];**  
 **$mail->send_as_email = 'String';**  
 
 **$mail->send();**  
