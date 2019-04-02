@@ -39,7 +39,7 @@ class PhpEwsWrapper {
     public $bcc;
     public $subject;
     public $message;
-    public $files;
+    public $attach;
     public $send_as_email;
 
     /*
@@ -137,7 +137,7 @@ class PhpEwsWrapper {
     private function __setItemType(){
         $this->request = new CreateItemType();
         $this->request->Items = new NonEmptyArrayOfAllItemsType();
-        $this->request->MessageDisposition = $this->files ? "SaveOnly" : 'SendAndSaveCopy';
+        $this->request->MessageDisposition = $this->attach ? "SaveOnly" : 'SendAndSaveCopy';
     }
 
     /*
@@ -235,11 +235,11 @@ class PhpEwsWrapper {
         //Create Item
         $response = $this->ews->CreateItem($this->request);
 
-        if($this->files){
+        if($this->attach){
             $message_id = $response->ResponseMessages->CreateItemResponseMessage[0]->Items->Message[0]->ItemId->Id;
 			
             //add attachment and send
-            return $this->sendSavedMsg($message_id);
+            return $this->__sendSavedMsg($message_id);
         }
 
         else{
@@ -258,7 +258,7 @@ class PhpEwsWrapper {
     /**
      * Attach file to an existing message in draft and then send the message
      */
-    private function sendSavedMsg($message_id){
+    private function __sendSavedMsg($message_id){
         //ATTACH FILE(s)
         //Build the request
         $attach_request = new CreateAttachmentType();
@@ -267,8 +267,8 @@ class PhpEwsWrapper {
         $attach_request->Attachments = new NonEmptyArrayOfAttachmentsType();
         
         //Build the file attachment(s).
-        if(is_array($this->files)){
-            foreach($this->files as $path){
+        if(is_array($this->attach)){
+            foreach($this->attach as $path){
                 $file = new \SplFileObject($path);
                 $finfo = finfo_open();
 
@@ -282,13 +282,13 @@ class PhpEwsWrapper {
         }
 
         else{
-            $file = new \SplFileObject($this->files);
+            $file = new \SplFileObject($this->attach);
             $finfo = finfo_open();
 
             $attachment = new FileAttachmentType();
             $attachment->Content = $file->openFile()->fread($file->getSize());
             $attachment->Name = $file->getBasename();
-            $attachment->ContentType = finfo_file($finfo, $this->files);
+            $attachment->ContentType = finfo_file($finfo, $this->attach);
             
             $attach_request->Attachments->FileAttachment[] = $attachment;
         }
