@@ -15,5 +15,6 @@
         "psr-4": {
             "amirsanni\\phpewswrapper\\":"src/"
         }
-    }
+    },
+    "keywords":["EWS", "Exchange Web Service", "PHP", "PhpEws", "Microsoft Exchange"]
 }
