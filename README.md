@@ -1,5 +1,5 @@
 # php-ews-wrapper
-A wrapper around jamesiarmes/php-ews library.
+A simple wrapper for jamesiarmes/php-ews library
 
 
 # Features
