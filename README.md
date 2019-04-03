@@ -23,7 +23,7 @@ $mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');
 **Note: Server address defaults to outlook.office365.com**
 
 
-### Send Email
+## Send Email
 ```
 $mail->sender_name = "John Doe";
 $mail->subject = "Test email";
@@ -40,7 +40,7 @@ $mail->send();
 
 
 
-### Create Draft
+## Create Draft
 ```
 $mail->sender_name = "Foo Bar";
 $mail->subject = "Test email";
