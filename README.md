@@ -23,7 +23,7 @@ $mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optiona
 ```
 
 **Note: Server address defaults to outlook.office365.com**  
-**Supported Versions: 2007, 2009, 2010, 2013, 2016. _Defaults to 2016_**
+**Supported Versions: 2007, 2009, 2010, 2013, 2016**. _Defaults to 2016_.
 
 
 
