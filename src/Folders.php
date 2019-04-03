@@ -17,7 +17,7 @@ use jamesiarmes\PhpEws\Type\ItemIdType;
 
 class Folders{
     protected $ews;
-    public $per_page = 50;//number of items to return per page
+    public $limit = 50;//number of items to return per page
     protected $folder_name;
 
     /*
@@ -54,12 +54,12 @@ class Folders{
         $find->ParentFolderIds->DistinguishedFolderId[] = $folder;
         
         // Set the start (offset) and limit based on page_number
-        $offset = $page_number <= 1 ? 0 : ($page_number*$this->per_page) - 1;
+        $offset = $page_number <= 1 ? 0 : ($page_number*$this->limit) - 1;
 
         $find->IndexedPageItemView = new IndexedPageViewType();
         $find->IndexedPageItemView->BasePoint = IndexBasePointType::BEGINNING;
         $find->IndexedPageItemView->Offset = $offset;
-        $find->IndexedPageItemView->MaxEntriesReturned = $this->per_page;
+        $find->IndexedPageItemView->MaxEntriesReturned = $this->limit;
         
         $items = $this->ews->FindItem($find);
         
@@ -138,7 +138,7 @@ class Folders{
                 ]);
             }
 
-            print_r($messages);
+            return $messages;
         }
 
         else{
@@ -157,8 +157,14 @@ class Folders{
     public function getContacts(int $page_number, string $folder_name){
         $response = $this->getFolderItems($page_number, $folder_name);
 
-        //format the response by returning specific fields
-        return $response;
+        if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
+            //format the response by returning specific fields
+            return $response;
+        }
+
+        else{
+            return $response[0]->ResponseCode.": ".$response[0]->MessageText;
+        }
     }
 
     /*
@@ -172,7 +178,13 @@ class Folders{
     public function getTasks(int $page_number, string $folder_id){
         $response = $this->getFolderItems($page_number, $folder_id);
 
-        //format the response by returning specific fields
-        return $response;
+        if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
+            //format the response by returning specific fields
+            return $response;
+        }
+
+        else{
+            return $response[0]->ResponseCode.": ".$response[0]->MessageText;
+        }
     }
 }
