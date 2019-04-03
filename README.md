@@ -1,19 +1,19 @@
-## php-ews-wrapper
+# php-ews-wrapper
 A simple wrapper for jamesiarmes/php-ews library
 
 
-## Installation
+# Installation
 ```composer require amirsanni/php-ews-wrapper```
 
 
-## Features
+# Features
 * Send Email
 * Create Draft
 
 
-## How to use
+# How to use
 
-# ~Send Email~
+## Send Email
 _use amirsanni\phpewswrapper\PhpEwsWrapper;_
 
 _$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');_
@@ -33,7 +33,7 @@ _$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');_
 **$mail->send();**  
 
 
-# ~Create Draft~
+## Create Draft
 _use amirsanni\phpewswrapper\PhpEwsWrapper;_
 
 _$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');_
