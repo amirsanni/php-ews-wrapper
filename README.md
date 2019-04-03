@@ -7,7 +7,7 @@ A simple wrapper for jamesiarmes/php-ews library
 
 
 # Features
-**Send Email**
+* Send Email
 
 
 # How to use
