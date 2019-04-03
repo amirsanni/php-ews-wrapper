@@ -23,13 +23,15 @@ use jamesiarmes\PhpEws\Type\FileAttachmentType;
 use jamesiarmes\PhpEws\Type\ItemIdType;
 use jamesiarmes\PhpEws\Type\DistinguishedFolderIdType;
 use jamesiarmes\PhpEws\Type\TargetFolderIdType;
+use jamesiarmes\PhpEws\Enumeration\MessageDispositionType;
 
 class PhpEwsWrapper {
     protected $ews;//ews connection client
 
+    private $sender;
     private $msg_obj;//phpews message object
     private $request;
-    private $sender;
+    private $response;
 
     
     public $sender_name;
@@ -70,17 +72,54 @@ class PhpEwsWrapper {
     */
 
     public function send(){
+        $this->__setAndCreateMessage();
+
+        return $this->__sendMessage();
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    public function createDraft(){
+        $this->__setAndCreateMessage(TRUE);
+
+        if($this->attach){
+            //attach files to the created message
+            $message_id = $this->__getCreatedMessageId();
+
+            $this->__attachFiles($message_id, $this->attach);
+        }
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    private function __setAndCreateMessage($save_only=FALSE){
         $this->msg_obj = new MessageType();
 
         $this->__setSender();
         $this->__setSubject();
         $this->__setMsgBody();
-        $this->__setItemType();
+        $this->__setItemType($save_only);
         $this->__setRecipient();
         $this->cc ? $this->__setCc() : "";
         $this->bcc ? $this->__setBcc() : "";
-        
-        return $this->__send();
+
+        //ADD MESSAGE OBJECT TO REQUEST DATA
+        $this->request->Items->Message = $this->msg_obj;
+
+        //Create Item
+        $this->response = $this->ews->CreateItem($this->request);
     }
 
     /*
@@ -134,10 +173,10 @@ class PhpEwsWrapper {
     ********************************************************************************************************************************
     */
 
-    private function __setItemType(){
+    private function __setItemType($save_only=FALSE){
         $this->request = new CreateItemType();
         $this->request->Items = new NonEmptyArrayOfAllItemsType();
-        $this->request->MessageDisposition = $this->attach ? "SaveOnly" : 'SendAndSaveCopy';
+        $this->request->MessageDisposition = $this->attach || $save_only ? MessageDispositionType::SAVE_ONLY : MessageDispositionType::SEND_AND_SAVE_COPY;
     }
 
     /*
@@ -228,22 +267,29 @@ class PhpEwsWrapper {
     ********************************************************************************************************************************
     */
 
-    private function __send(){
-        //ADD MESSAGE OBJECT TO REQUEST DATA
-        $this->request->Items->Message = $this->msg_obj;
+    private function __getCreatedMessageId(){
+        return $this->response->ResponseMessages->CreateItemResponseMessage[0]->Items->Message[0]->ItemId->Id;
+    }
 
-        //Create Item
-        $response = $this->ews->CreateItem($this->request);
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
 
-        if($this->attach){
-            $message_id = $response->ResponseMessages->CreateItemResponseMessage[0]->Items->Message[0]->ItemId->Id;
-			
+    private function __sendMessage(){
+        if($this->attach){			
             //add attachment and send
-            return $this->__sendSavedMsg($message_id);
+            $message_id = $this->__getCreatedMessageId();
+            $change_key = $this->__attachFiles($message_id, $this->attach);
+
+            return $this->__sendSavedMsg($message_id, $change_key);
         }
 
         else{
-            return $response->ResponseMessages->CreateItemResponseMessage[0]->ResponseClass == ResponseClassType::SUCCESS;
+            return $this->response->ResponseMessages->CreateItemResponseMessage[0]->ResponseClass == ResponseClassType::SUCCESS;
         }
     }
 
@@ -256,9 +302,9 @@ class PhpEwsWrapper {
     */
 
     /**
-     * Attach file to an existing message in draft and then send the message
+     * Attach file to an existing message in draft and return the new changeKey
      */
-    private function __sendSavedMsg($message_id){
+    private function __attachFiles($message_id, $files){
         //ATTACH FILE(s)
         //Build the request
         $attach_request = new CreateAttachmentType();
@@ -267,8 +313,8 @@ class PhpEwsWrapper {
         $attach_request->Attachments = new NonEmptyArrayOfAttachmentsType();
         
         //Build the file attachment(s).
-        if(is_array($this->attach)){
-            foreach($this->attach as $path){
+        if(is_array($files)){
+            foreach($files as $path){
                 $file = new \SplFileObject($path);
                 $finfo = finfo_open();
 
@@ -282,13 +328,13 @@ class PhpEwsWrapper {
         }
 
         else{
-            $file = new \SplFileObject($this->attach);
+            $file = new \SplFileObject($files);
             $finfo = finfo_open();
 
             $attachment = new FileAttachmentType();
             $attachment->Content = $file->openFile()->fread($file->getSize());
             $attachment->Name = $file->getBasename();
-            $attachment->ContentType = finfo_file($finfo, $this->attach);
+            $attachment->ContentType = finfo_file($finfo, $files);
             
             $attach_request->Attachments->FileAttachment[] = $attachment;
         }
@@ -296,11 +342,23 @@ class PhpEwsWrapper {
         //Attach the file to the message
         $attach_response = $this->ews->CreateAttachment($attach_request);
 		
-		//Get the new change key
-		$change_key = $attach_response->ResponseMessages->CreateAttachmentResponseMessage[0]->Attachments->FileAttachment[0]->AttachmentId->RootItemChangeKey;
+		//Get and return the new change key
+		return $attach_response->ResponseMessages->CreateAttachmentResponseMessage[0]->Attachments->FileAttachment[0]->AttachmentId->RootItemChangeKey;
+    }
 
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
 
-        //NOW SEND THE MESSAGE
+    /**
+     * Send a message from draft
+     */
+    private function __sendSavedMsg($message_id, $change_key){
+        //SEND THE MESSAGE
         $send_request = new SendItemType();
         $send_request->SaveItemToFolder = true;
         $send_request->ItemIds = new NonEmptyArrayOfBaseItemIdsType();
