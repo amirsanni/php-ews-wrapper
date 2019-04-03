@@ -6,7 +6,7 @@ use amirsanni\phpewswrapper\PhpEwsWrapper;
 
 $mail = new PhpEwsWrapper('amir.sanni@mainone.net', 'Razafindrakoto10');
 
-$mail->per_page = 30;
+$mail->limit = 30;
 
 $mail->getInboxMessages();//Messages in inbox
 $mail->getSentItems();
