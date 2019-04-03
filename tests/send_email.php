@@ -3,7 +3,7 @@ require "../vendor/autoload.php";
 
 use amirsanni\phpewswrapper\PhpEwsWrapper;
 
-$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');
+$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optionalVersion');
 
 $mail->sender_name = "Amir Sanni";
 $mail->subject = "Package Test";
