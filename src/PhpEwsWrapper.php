@@ -463,7 +463,7 @@ class PhpEwsWrapper {
     ********************************************************************************************************************************
     */
 
-    public function getMessages(int $page_number=1){
+    public function getInboxMessages(int $page_number=1){
         $this->__instantiateFoldersClass();
         
         return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::INBOX);
