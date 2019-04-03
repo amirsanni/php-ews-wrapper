@@ -19,10 +19,12 @@ composer require amirsanni/php-ews-wrapper
 ```
 use amirsanni\phpewswrapper\PhpEwsWrapper;
 
-$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');
+$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optionalVersion');
 ```
 
-**Note: Server address defaults to outlook.office365.com**
+**Note: Server address defaults to outlook.office365.com**  
+**Supported Versions: 2007, 2009, 2010, 2013, 2016. _Defaults to 2016_**
+
 
 
 ## Send Email
