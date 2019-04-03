@@ -27,6 +27,7 @@ use jamesiarmes\PhpEws\Enumeration\MessageDispositionType;
 
 class PhpEwsWrapper {
     protected $ews;//ews connection client
+    protected $version;
 
     private $sender;
     private $msg_obj;//phpews message object
@@ -52,14 +53,46 @@ class PhpEwsWrapper {
     ********************************************************************************************************************************
     */
 
-    public function __construct(string $email, string $password, string $server="outlook.office365.com"){
+    public function __construct(string $email, string $password, string $server="outlook.office365.com", $version='2016'){
         try{
-            $this->ews = new Client($server, $email, $password, Client::VERSION_2016);
+            $this->__setVersion($version);
+            $this->ews = new Client($server, $email, $password, $this->version);
             $this->sender = $email;
         }
 
         catch(Exception $e){
             echo $e->getMessage();
+        }
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    private function __setVersion($version){
+        switch($version){
+            case 2007:
+                $this->version = Client::VERSION_2007;
+                break;
+
+            case 2009:
+                $this->version = Client::VERSION_2009;
+                break;
+
+            case 2010:
+                $this->version = Client::VERSION_2010;
+                break;
+
+            case 2013:
+                $this->version = Client::VERSION_2013;
+                break;
+
+            default:
+                $this->version = Client::VERSION_2016;
         }
     }
 
