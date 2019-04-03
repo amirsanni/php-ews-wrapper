@@ -48,7 +48,7 @@ class PhpEwsWrapper {
     
     /** FOLDERS */
     protected $folders;
-    public $per_page;
+    public $limit;
 
     /*
     ********************************************************************************************************************************
@@ -452,7 +452,7 @@ class PhpEwsWrapper {
     private function __instantiateFoldersClass(){
         $this->folders = new Folders($this->ews);
 
-        $this->folders->per_page = $this->per_page;
+        $this->folders->limit = $this->limit;
     }
 
     /*
