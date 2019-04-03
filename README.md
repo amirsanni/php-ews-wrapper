@@ -25,32 +25,32 @@ $mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');
 
 ### Send Email
 ```
-**$mail->sender_name = "SenderName";**  
-**$mail->subject = "Subject";**  
-**$mail->message = "Test email";**  
-**$mail->recipient = 'String' or [Array];**  
-**$mail->recipient_name = "Amir Sanni";**  
-**$mail->cc = 'String' or [Array];**  
-**$mail->bcc = 'String' or [Array];**  
-**$mail->attach = 'String' or [Array];**  
-**$mail->send_as_email = 'String';**  
+$mail->sender_name = "John Doe";
+$mail->subject = "Test email";
+$mail->message = "This is a test email";
+$mail->recipient = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
+$mail->recipient_name = "Amir Sanni";
+$mail->cc = ['abc@xyz.com', 'abc@example.com']; //'abc@example.com'
+$mail->bcc = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
+$mail->attach = ['file1', 'file2', 'file3']; //'file'
+$mail->send_as_email = 'abc@xyz.com';
 
-**$mail->send();**  
+$mail->send();
 ```
 
 
 
 ### Create Draft
 ```
-$mail->sender_name = "SenderName";
-$mail->subject = "Subject";
-$mail->message = "Test email";
-$mail->recipient = 'String' or [Array];
+$mail->sender_name = "Foo Bar";
+$mail->subject = "Test email";
+$mail->message = "This is a test email";
+$mail->recipient = 'abc@example.com'; //['abc@xyz.com', 'john.doe@example.com']
 $mail->recipient_name = "Amir Sanni";
-$mail->cc = 'String' or [Array];
-$mail->bcc = 'String' or [Array];
-$mail->attach = 'String' or [Array];
-$mail->send_as_email = 'String';
+$mail->cc = ['abc@xyz.com', 'abc@example.com']; //'abc@example.com'
+$mail->bcc = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
+$mail->attach = ['file1', 'file2', 'file3']; //'file'
+$mail->send_as_email = 'abc@xyz.com';
 
 $mail->createDraft();
 ```
