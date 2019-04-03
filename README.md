@@ -33,7 +33,7 @@ _$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');_
 **$mail->send();**  
 
 
-## Create Draft
+### Create Draft
 _use amirsanni\phpewswrapper\PhpEwsWrapper;_
 
 _$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');_
