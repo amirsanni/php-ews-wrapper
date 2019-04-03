@@ -13,7 +13,9 @@ A simple wrapper for jamesiarmes/php-ews library
 
 # How to use
 
-## Send Email
+
+
+### Send Email
 _use amirsanni\phpewswrapper\PhpEwsWrapper;_
 
 _$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');_
@@ -31,6 +33,8 @@ _$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress');_
 **$mail->send_as_email = 'String';**  
 
 **$mail->send();**  
+
+
 
 
 ### Create Draft
