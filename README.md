@@ -21,6 +21,7 @@ composer require amirsanni/php-ews-wrapper
 * Get Messages in Favorites Folder
 * Get Junk Messages
 * Get Tasks
+* Get Conversation History
 
 
 # How to use
@@ -67,4 +68,45 @@ $mail->attach = ['file1', 'file2', 'file3']; //'file'
 $mail->send_as_email = 'abc@xyz.com';
 
 $mail->createDraft();
+```
+
+
+
+## Get Messages
+```
+require "vendor/autoload.php";
+
+use amirsanni\phpewswrapper\PhpEwsWrapper;
+
+$mail = new PhpEwsWrapper('amir.sanni@mainone.net', 'Razafindrakoto10');
+
+$mail->limit = 30;
+
+//each of the methods takes an optional page_number of type int
+$mail->getInboxMessages();//Messages in inbox
+$mail->getSentItems(3);
+$mail->getDraftItems();
+$mail->getOutboxItems(1);
+$mail->getConversationHistory();
+$mail->getFavourites();
+$mail->getJunkItems();
+$mail->getDeletedMessages();
+$mail->getArchivedMessages();
+$mail->getContacts();
+$mail->getTasks();
+```
+
+
+## Send Message From Draft
+```
+require "vendor/autoload.php";
+
+use amirsanni\phpewswrapper\PhpEwsWrapper;
+
+$mail = new PhpEwsWrapper('amir.sanni@mainone.net', 'Razafindrakoto10');
+
+$mail->limit = 30;
+
+$mail->getDraftItems();
+
 ```
