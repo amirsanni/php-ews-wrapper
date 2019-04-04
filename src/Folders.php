@@ -117,8 +117,7 @@ class Folders{
 
         //format the response by returning specific fields
         if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
-            //proceed
-            
+            //proceed            
             $messages = [];
             $retrieved_messages = $response[0]->RootFolder->Items->Message;
 
@@ -145,16 +144,14 @@ class Folders{
 
             $res->messages = $messages;
             $res->status = 1;
-
-            return $res;
         }
 
         else{
             $res->messages = $response[0]->ResponseCode.": ".$response[0]->MessageText;
             $res->status = 0;
-
-            return $res;
         }
+
+        return $res;
     }
 
     /*
