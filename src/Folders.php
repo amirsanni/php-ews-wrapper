@@ -217,7 +217,9 @@ class Folders{
 
         if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
             //format the response by returning specific fields
-            $res->contacts = $response;
+            $retrieved_contacts = $response[0]->RootFolder->Items->Contact;
+
+            $res->contacts = $retrieved_contacts;
             $res->status = 1;
         }
 
@@ -243,8 +245,34 @@ class Folders{
         $res = new \stdClass();
 
         if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
-            $res->tasks = $response;
+            $retrieved_tasks = $response[0]->RootFolder->Items->Task;
+
+            $tasks = [];
+
+            foreach($retrieved_tasks as $task){
+                $tsk = new \stdClass();
+
+                $tsk->task_id = $task->ItemId->Id;
+                $tsk->change_key = $task->ItemId->ChangeKey;
+                $tsk->assigned_at = $task->AssignedTime;
+                $tsk->delegated_by = $task->Delegator;
+                $tsk->due_date = $task->DueDate;
+                $tsk->is_team_task = $task->IsTeamTask;
+                $tsk->task_owner = $task->Owner;
+                $tsk->start_date = $task->StartDate;
+                $tsk->status = $task->Status;
+                $tsk->importance = $task->Importance;
+                $tsk->last_modified_by = $task->LastModifiedName;
+                $tsk->last_modified_at = $task->LastModifiedTime;
+                $tsk->subject = $task->Subject;
+                $tsk->flagged = (int)($task->Flag->FlagStatus != "NotFlagged");
+
+                array_push($tasks, $tsk);
+            }
+
+            $res->tasks = $tasks;
             $res->status = 1;
+            $res->msg = 'success';
         }
 
         else{
