@@ -137,6 +137,7 @@ class Folders{
                 $det->date_received = $msg->DateTimeReceived;
                 $det->flagged = (int)($msg->Flag->FlagStatus != "NotFlagged");
                 $det->attachments = $msg_info->Attachments && $msg_info->Attachments->FileAttachment ? implode(", ", array_column($msg_info->Attachments->FileAttachment, 'Name')) : "";
+                $det->is_read = $msg_info->IsRead;
                 $det->message = $msg_info->Body->_;
 
                 array_push($messages, $det);
@@ -144,10 +145,84 @@ class Folders{
 
             $res->messages = $messages;
             $res->status = 1;
+            $res->msg = "success";
         }
 
         else{
-            $res->messages = $response[0]->ResponseCode.": ".$response[0]->MessageText;
+            $res->msg = $response[0]->ResponseCode.": ".$response[0]->MessageText;
+            $res->status = 0;
+            $res->messages = '';
+        }
+
+        return $res;
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    public function getUnreadMessages(int $page_number){
+        $response = $this->getMessages($page_number, DistinguishedFolderIdNameType::INBOX);
+
+        $res = new \stdClass();
+
+        if($response->status === 1 && $response->messages){
+            $unread_messages = [];
+
+            foreach($response->messages as $message){
+                if($message->is_read){
+                    continue;
+                }
+
+                array_push($unread_messages, $message);
+            }
+
+            $res->status = 1;
+            $res->msg = "success";
+            $res->messages = $unread_messages;
+
+            return $res;
+        }
+
+        else if($response->status === 1){
+            //no message in inbox
+            $res->status = 0;
+            $res->msg = "No message found";
+
+            return $res;
+        }
+
+        else{
+            //there is an error
+            return $response;
+        }
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    public function getContacts(int $page_number){
+        $response = $this->getFolderItems($page_number, DistinguishedFolderIdNameType::MY_CONTACTS);
+
+        $res = new \stdClass();
+
+        if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
+            //format the response by returning specific fields
+            $res->contacts = $response;
+            $res->status = 1;
+        }
+
+        else{
+            $res->msg = $response[0]->ResponseCode.": ".$response[0]->MessageText;
             $res->status = 0;
         }
 
@@ -162,37 +237,21 @@ class Folders{
     ********************************************************************************************************************************
     */
 
-    public function getContacts(int $page_number){
-        $response = $this->getFolderItems($page_number, DistinguishedFolderIdNameType::MY_CONTACTS);
-
-        if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
-            //format the response by returning specific fields
-            return $response;
-        }
-
-        else{
-            return $response[0]->ResponseCode.": ".$response[0]->MessageText;
-        }
-    }
-
-    /*
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    */
-
     public function getTasks(int $page_number){
         $response = $this->getFolderItems($page_number, DistinguishedFolderIdNameType::TASKS);
 
+        $res = new \stdClass();
+
         if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
-            //format the response by returning specific fields
-            return $response;
+            $res->tasks = $response;
+            $res->status = 1;
         }
 
         else{
-            return $response[0]->ResponseCode.": ".$response[0]->MessageText;
+            $res->msg = $response[0]->ResponseCode.": ".$response[0]->MessageText;
+            $res->status = 0;
         }
+
+        return $res;
     }
 }
