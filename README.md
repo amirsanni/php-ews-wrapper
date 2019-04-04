@@ -53,7 +53,7 @@ $mail->bcc = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
 $mail->attach = ['file1', 'file2', 'file3']; //'file'
 $mail->send_as_email = 'abc@xyz.com';
 
-$mail->send();
+$mail->send();  
 ```
 
 
@@ -70,19 +70,13 @@ $mail->bcc = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
 $mail->attach = ['file1', 'file2', 'file3']; //'file'
 $mail->send_as_email = 'abc@xyz.com';
 
-$mail->createDraft();
+$mail->createDraft();  
 ```
 
 
 
 ## Get Messages
 ```
-require "vendor/autoload.php";
-
-use amirsanni\phpewswrapper\PhpEwsWrapper;
-
-$mail = new PhpEwsWrapper('amir.sanni@mainone.net', 'Razafindrakoto10');
-
 $mail->limit = 30;
 
 //each of the methods takes an optional page_number of type int
@@ -96,18 +90,12 @@ $mail->getJunkItems();
 $mail->getDeletedMessages();
 $mail->getArchivedMessages();
 $mail->getContacts();
-$mail->getTasks();
+$mail->getTasks();  
 ```
 
 
 ## Send Message From Draft
 ```
-require "vendor/autoload.php";
-
-use amirsanni\phpewswrapper\PhpEwsWrapper;
-
-$mail = new PhpEwsWrapper('amir.sanni@mainone.net', 'Razafindrakoto10');
-
 $mail->limit = 30;
 
 $draft_items = $mail->getDraftItems();
@@ -120,4 +108,19 @@ if($draft_items->status === 1 && $draft_items->messages){
 
 ```
 
-Check out the examples folder for more usage information
+
+## Change Message Read Status
+```
+$mail->limit = 30;
+
+$items = $mail->getInboxMessages();//$mail->getUnreadMessages()
+
+if($items->status === 1 && $items->messages){
+    foreach($items->messages as $item){
+        $mail->markAsRead($item->message_id, $item->change_key);//$mail->markAsUnread($item->message_id, $item->change_key);
+    }
+}
+
+```
+
+Check out the examples folder for more usage information  
