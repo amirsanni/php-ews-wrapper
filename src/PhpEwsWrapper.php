@@ -24,6 +24,10 @@ use jamesiarmes\PhpEws\Type\ItemIdType;
 use jamesiarmes\PhpEws\Type\DistinguishedFolderIdType;
 use jamesiarmes\PhpEws\Type\TargetFolderIdType;
 use jamesiarmes\PhpEws\Enumeration\MessageDispositionType;
+use jamesiarmes\PhpEws\Request\UpdateItemType;
+use jamesiarmes\PhpEws\Type\ItemChangeType;
+use jamesiarmes\PhpEws\Type\SetItemFieldType;
+use jamesiarmes\PhpEws\Type\PathToUnindexedFieldType;
 
 class PhpEwsWrapper {
     protected $ews;//ews connection client
@@ -428,6 +432,41 @@ class PhpEwsWrapper {
     ********************************************************************************************************************************
     ********************************************************************************************************************************
     ********************************************************************************************************************************
+    */
+
+    private function __updateMessageReadStatus(string $message_id, string $change_key, string $read_status){
+        $request = new UpdateItemType();
+        $request->MessageDisposition = 'SaveOnly';
+        $request->ConflictResolution = 'AlwaysOverwrite';
+        $request->ItemChanges = [];
+
+        $change = new ItemChangeType();
+        $change->ItemId = new ItemIdType();
+        $change->ItemId->Id = $message_id;
+        $change->ItemId->ChangeKey = $change_key;
+
+        $field = new SetItemFieldType();
+        $field->FieldURI = new PathToUnindexedFieldType();
+        $field->FieldURI->FieldURI = 'message:IsRead';
+        $field->Message = new MessageType();
+        $field->Message->IsReadSpecified = $read_status == 'read' ? TRUE : FALSE;
+        $field->Message->IsRead = $read_status == 'read' ? TRUE : FALSE;
+
+        $change->Updates->SetItemField[] = $field;
+
+        $request->ItemChanges[] = $change;
+
+        $response = $this->ews->UpdateItem($request);
+        
+        return $response->ResponseMessages->UpdateItemResponseMessage[0]->ResponseClass == ResponseClassType::SUCCESS;
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
     ********************************************************************************************************************************
     ********************************************************************************************************************************
     ********************************************************************************************************************************
@@ -671,13 +710,13 @@ class PhpEwsWrapper {
     */
 
     /**
-     * Get your contacts
+     * Get your tasks
      * @param int $page_number
      */
-    public function getContacts(int $page_number=1){
+    public function getTasks(int $page_number=1){
         $this->__instantiateFoldersClass();
         
-        return $this->folders->getContacts($page_number);
+        return $this->folders->getTasks($page_number);
     }
 
     /*
@@ -689,13 +728,13 @@ class PhpEwsWrapper {
     */
 
     /**
-     * Get your tasks
+     * Get your contacts
      * @param int $page_number
      */
-    public function getTasks(int $page_number=1){
+    public function getContacts(int $page_number=1){
         $this->__instantiateFoldersClass();
         
-        return $this->folders->getTasks($page_number);
+        return $this->folders->getContacts($page_number);
     }
 
     /*
@@ -715,5 +754,37 @@ class PhpEwsWrapper {
         $this->__instantiateFoldersClass();
         
         return $this->folders->getMessages($page_number, $folder_id);
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    /**
+     * Get your tasks
+     * @param int $page_number
+     */
+    public function markAsRead(string $message_id, string $change_key){
+        return $this->__updateMessageReadStatus($message_id, $change_key, 'read');
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    /**
+     * Get your tasks
+     * @param int $page_number
+     */
+    public function markAsUnread(string $message_id, string $change_key){
+        return $this->__updateMessageReadStatus($message_id, $change_key, 'unread');
     }
 }
