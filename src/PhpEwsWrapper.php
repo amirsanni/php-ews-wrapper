@@ -765,8 +765,9 @@ class PhpEwsWrapper {
     */
 
     /**
-     * Get your tasks
-     * @param int $page_number
+     * Mark message as read
+     * @param string $message_id
+     * @param string $change_key
      */
     public function markAsRead(string $message_id, string $change_key){
         return $this->__updateMessageReadStatus($message_id, $change_key, 'read');
@@ -781,8 +782,9 @@ class PhpEwsWrapper {
     */
 
     /**
-     * Get your tasks
-     * @param int $page_number
+     * Mark message as unread
+     * @param string $message_id
+     * @param string $change_key
      */
     public function markAsUnread(string $message_id, string $change_key){
         return $this->__updateMessageReadStatus($message_id, $change_key, 'unread');
