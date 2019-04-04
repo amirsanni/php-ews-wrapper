@@ -6,6 +6,7 @@ use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfBaseFolderIdsType;
 use jamesiarmes\PhpEws\Type\ItemResponseShapeType;
 use jamesiarmes\PhpEws\Enumeration\DefaultShapeNamesType;
 use jamesiarmes\PhpEws\Type\DistinguishedFolderIdType;
+use jamesiarmes\PhpEws\Enumeration\DistinguishedFolderIdNameType;
 use jamesiarmes\PhpEws\Type\IndexedPageViewType;
 use jamesiarmes\PhpEws\Enumeration\IndexBasePointType;
 use jamesiarmes\PhpEws\Enumeration\ItemQueryTraversalType;
@@ -154,8 +155,8 @@ class Folders{
     ********************************************************************************************************************************
     */
 
-    public function getContacts(int $page_number, string $folder_name){
-        $response = $this->getFolderItems($page_number, $folder_name);
+    public function getContacts(int $page_number){
+        $response = $this->getFolderItems($page_number, DistinguishedFolderIdNameType::MY_CONTACTS);
 
         if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
             //format the response by returning specific fields
@@ -175,8 +176,8 @@ class Folders{
     ********************************************************************************************************************************
     */
 
-    public function getTasks(int $page_number, string $folder_id){
-        $response = $this->getFolderItems($page_number, $folder_id);
+    public function getTasks(int $page_number){
+        $response = $this->getFolderItems($page_number, DistinguishedFolderIdNameType::TASKS);
 
         if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
             //format the response by returning specific fields
