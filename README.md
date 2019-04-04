@@ -11,6 +11,7 @@ composer require amirsanni/php-ews-wrapper
 # Features
 * Send Email
 * Create Draft
+* Send Messages in Draft
 * Get Inbox Messages
 * Get Sent Items
 * Get Outbox Items
