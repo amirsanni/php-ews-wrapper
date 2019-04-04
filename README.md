@@ -24,6 +24,7 @@ composer require amirsanni/php-ews-wrapper
 * Get Junk Messages
 * Get Tasks
 * Get Conversation History
+* Change Message Read Status
 
 
 # How to use
