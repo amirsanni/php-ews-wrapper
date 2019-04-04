@@ -581,6 +581,24 @@ class PhpEwsWrapper {
     */
 
     /**
+     * Get messages from your conversation history folder
+     * @param int $page_number
+     */
+    public function getConversationHistory(int $page_number=1){
+        $this->__instantiateFoldersClass();
+        
+        return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::CONVERSATION_HISTORY);
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    /**
      * Get messages from your junk folder
      * @param int $page_number
      */
@@ -659,7 +677,7 @@ class PhpEwsWrapper {
     public function getTasks(int $page_number=1){
         $this->__instantiateFoldersClass();
         
-        return $this->folders->getTasks($page_number, DistinguishedFolderIdNameType::TASKS);
+        return $this->folders->getTasks($page_number);
     }
 
     /*
