@@ -10,6 +10,7 @@ $mail->limit = 30;
 
 //each of the methods takes an optional pageNumber of type int
 $mail->getInboxMessages();//Messages in inbox
+$mail->getUnreadMessages(1);
 $mail->getSentItems(3);
 $mail->getDraftItems();
 $mail->getOutboxItems(1);
