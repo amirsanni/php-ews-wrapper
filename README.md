@@ -107,6 +107,14 @@ $mail = new PhpEwsWrapper('amir.sanni@mainone.net', 'Razafindrakoto10');
 
 $mail->limit = 30;
 
-$mail->getDraftItems();
+$draft_items = $mail->getDraftItems();
+
+if($draft_items->status === 1 && $draft_items->messages){
+    foreach($draft_items->messages as $item){
+        $mail->sendMessage($item->message_id, $item->change_key);
+    }
+}
 
 ```
+
+Check out the examples folder for more usage information
