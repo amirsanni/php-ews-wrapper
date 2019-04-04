@@ -4,7 +4,7 @@ require "vendor/autoload.php";
 
 use amirsanni\phpewswrapper\PhpEwsWrapper;
 
-$mail = new PhpEwsWrapper('amir.sanni@mainone.net', 'Razafindrakoto10');
+$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optionalVersion');
 
 $mail->limit = 30;
 
