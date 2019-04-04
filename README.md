@@ -13,6 +13,7 @@ composer require amirsanni/php-ews-wrapper
 * Create Draft
 * Send Messages in Draft
 * Get Inbox Messages
+* Get Unread Messages
 * Get Sent Items
 * Get Outbox Items
 * Get Draft Items
