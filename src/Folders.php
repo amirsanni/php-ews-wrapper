@@ -113,6 +113,8 @@ class Folders{
     public function getMessages(int $page_number, string $folder_name){
         $response = $this->getFolderItems($page_number, $folder_name);
 
+        $res = new \stdClass();
+
         //format the response by returning specific fields
         if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
             //proceed
@@ -123,27 +125,35 @@ class Folders{
             foreach($retrieved_messages as $msg){
                 $msg_info = $this->__getMessageDetails($msg->ItemId->Id);
 
-                array_push($messages, [
-                    'message_id'=>$msg->ItemId->Id,
-                    'change_key'=>$msg->ItemId->ChangeKey,
-                    'message'=>$msg_info->Body->_,
-                    'subject'=>$msg->Subject,
-                    'sender'=>$msg_info->Sender->Mailbox->EmailAddress ? $msg_info->Sender->Mailbox->EmailAddress : $msg_info->From->Mailbox->EmailAddress,
-                    'recipients'=>$msg_info->ToRecipients && $msg_info->ToRecipients->Mailbox ? implode(", ", array_column($msg_info->ToRecipients->Mailbox, 'EmailAddress')) : "",
-                    'cc'=>$msg_info->CcRecipients && $msg_info->CcRecipients->Mailbox ? implode(", ", array_column($msg_info->CcRecipients->Mailbox, 'EmailAddress')) : "",
-                    'bcc'=>$msg_info->BccRecipients && $msg_info->BccRecipients->Mailbox ? implode(", ", array_column($msg_info->BccRecipients->Mailbox, 'EmailAddress')) : "",
-                    'date_sent'=>$msg->DateTimeSent,
-                    'date_received'=>$msg->DateTimeReceived,
-                    'flagged'=>(int)($msg->Flag->FlagStatus != "NotFlagged"),
-                    'attachments'=>$msg_info->Attachments && $msg_info->Attachments->FileAttachment ? implode(", ", array_column($msg_info->Attachments->FileAttachment, 'Name')) : ""
-                ]);
+                $det = new \stdClass();
+
+                $det->message_id = $msg->ItemId->Id;
+                $det->change_key = $msg->ItemId->ChangeKey;
+                $det->subject = $msg->Subject;
+                $det->sender = $msg_info->Sender->Mailbox->EmailAddress ? $msg_info->Sender->Mailbox->EmailAddress : $msg_info->From->Mailbox->EmailAddress;
+                $det->recipients = $msg_info->ToRecipients && $msg_info->ToRecipients->Mailbox ? implode(", ", array_column($msg_info->ToRecipients->Mailbox, 'EmailAddress')) : "";
+                $det->cc = $msg_info->CcRecipients && $msg_info->CcRecipients->Mailbox ? implode(", ", array_column($msg_info->CcRecipients->Mailbox, 'EmailAddress')) : "";
+                $det->bcc = $msg_info->BccRecipients && $msg_info->BccRecipients->Mailbox ? implode(", ", array_column($msg_info->BccRecipients->Mailbox, 'EmailAddress')) : "";
+                $det->date_sent = $msg->DateTimeSent;
+                $det->date_received = $msg->DateTimeReceived;
+                $det->flagged = (int)($msg->Flag->FlagStatus != "NotFlagged");
+                $det->attachments = $msg_info->Attachments && $msg_info->Attachments->FileAttachment ? implode(", ", array_column($msg_info->Attachments->FileAttachment, 'Name')) : "";
+                $det->message = $msg_info->Body->_;
+
+                array_push($messages, $det);
             }
 
-            return $messages;
+            $res->messages = $messages;
+            $res->status = 1;
+
+            return $res;
         }
 
         else{
-            return $response[0]->ResponseCode.": ".$response[0]->MessageText;
+            $res->messages = $response[0]->ResponseCode.": ".$response[0]->MessageText;
+            $res->status = 0;
+
+            return $res;
         }
     }
 
