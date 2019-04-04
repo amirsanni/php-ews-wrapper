@@ -491,13 +491,31 @@ class PhpEwsWrapper {
     */
 
     /**
-     * Get messages from your inbox
+     * Get messages from inbox
      * @param int $page_number
      */
     public function getInboxMessages(int $page_number=1){
         $this->__instantiateFoldersClass();
         
         return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::INBOX);
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    /**
+     * Get unread messages from inbox
+     * @param int $page_number
+     */
+    public function getUnreadMessages(int $page_number=1){
+        $this->__instantiateFoldersClass();
+        
+        return $this->folders->getUnreadMessages($page_number);
     }
 
     /*
