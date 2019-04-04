@@ -13,6 +13,7 @@ $mail->getInboxMessages();//Messages in inbox
 $mail->getSentItems(3);
 $mail->getDraftItems();
 $mail->getOutboxItems(1);
+$mail->getConversationHistory();
 $mail->getFavourites();
 $mail->getJunkItems();
 $mail->getDeletedMessages();
