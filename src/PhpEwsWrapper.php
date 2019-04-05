@@ -7,27 +7,15 @@ namespace amirsanni\phpewswrapper;
 
 use jamesiarmes\PhpEws\Client;
 use jamesiarmes\PhpEws\Request\CreateItemType;
-use jamesiarmes\PhpEws\Request\CreateAttachmentType;
-use jamesiarmes\PhpEws\Request\SendItemType;
 use jamesiarmes\PhpEws\Enumeration\ResponseClassType;
 use jamesiarmes\PhpEws\Enumeration\DistinguishedFolderIdNameType;
 use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfAllItemsType;
 use jamesiarmes\PhpEws\ArrayType\ArrayOfRecipientsType;
-use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfAttachmentsType;
-use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfBaseItemIdsType;
 use jamesiarmes\PhpEws\Type\MessageType;
 use jamesiarmes\PhpEws\Type\EmailAddressType;
 use jamesiarmes\PhpEws\Type\BodyType;
 use jamesiarmes\PhpEws\Type\SingleRecipientType;
-use jamesiarmes\PhpEws\Type\FileAttachmentType;
-use jamesiarmes\PhpEws\Type\ItemIdType;
-use jamesiarmes\PhpEws\Type\DistinguishedFolderIdType;
-use jamesiarmes\PhpEws\Type\TargetFolderIdType;
 use jamesiarmes\PhpEws\Enumeration\MessageDispositionType;
-use jamesiarmes\PhpEws\Request\UpdateItemType;
-use jamesiarmes\PhpEws\Type\ItemChangeType;
-use jamesiarmes\PhpEws\Type\SetItemFieldType;
-use jamesiarmes\PhpEws\Type\PathToUnindexedFieldType;
 
 class PhpEwsWrapper {
     protected $ews;//ews connection client
@@ -50,8 +38,8 @@ class PhpEwsWrapper {
     public $send_as_email;
     public $reply_to;
     
-    /** FOLDERS */
-    protected $folders;
+    /** MESSAGES */
+    protected $messages_class_obj;
     public $limit;
 
     /*
@@ -200,15 +188,15 @@ class PhpEwsWrapper {
     private function __setCc(){
         $copy_email_addresses = new ArrayOfRecipientsType();
 
-        $copy_email_addresses->Mailbox[] = new EmailAddressType();
-
         if(is_array($this->cc)){
             for($i = 0; $i < count($this->cc); $i++){
+                $copy_email_addresses->Mailbox[$i] = new EmailAddressType();
                 $copy_email_addresses->Mailbox[$i]->EmailAddress = trim($this->cc[$i]);
             }
         }
 
         else{
+            $copy_email_addresses->Mailbox[0] = new EmailAddressType();
             $copy_email_addresses->Mailbox[0]->EmailAddress = trim($this->cc);
         }
 
@@ -227,15 +215,15 @@ class PhpEwsWrapper {
     private function __setBcc(){
         $blind_copy_email_addresses = new ArrayOfRecipientsType();
 
-        $blind_copy_email_addresses->Mailbox[] = new EmailAddressType();
-
         if(is_array($this->bcc)){
             for($i = 0; $i < count($this->bcc); $i++){
+                $blind_copy_email_addresses->Mailbox[$i] = new EmailAddressType();
                 $blind_copy_email_addresses->Mailbox[$i]->EmailAddress = trim($this->bcc[$i]);
             }
         }
 
         else{
+            $blind_copy_email_addresses->Mailbox[0] = new EmailAddressType();
             $blind_copy_email_addresses->Mailbox[0]->EmailAddress = trim($this->bcc);
         }
 
@@ -306,12 +294,14 @@ class PhpEwsWrapper {
     */
 
     private function __sendMessage(){
-        if($this->attach){			
+        if($this->attach){
+            $this->__instantiateMessagesClass();
+
             //add attachment and send
             $message_id = $this->__getCreatedMessageId();
-            $change_key = $this->__attachFiles($message_id, $this->attach);
+            $change_key = $this->messages_class_obj->attachFiles($message_id, $this->attach);
 
-            return $this->__sendSavedMsg($message_id, $change_key);
+            return $this->messages_class_obj->sendSavedMsg($message_id, $change_key);
         }
 
         else{
@@ -327,138 +317,10 @@ class PhpEwsWrapper {
     ********************************************************************************************************************************
     */
 
-    /**
-     * Attach file to an existing message in draft and return the new changeKey
-     */
-    private function __attachFiles($message_id, $files){
-        //ATTACH FILE(s)
-        //Build the request
-        $attach_request = new CreateAttachmentType();
-        $attach_request->ParentItemId = new ItemIdType();
-        $attach_request->ParentItemId->Id = $message_id;
-        $attach_request->Attachments = new NonEmptyArrayOfAttachmentsType();
-        
-        //Build the file attachment(s).
-        if(is_array($files)){
-            foreach($files as $path){
-                $file = new \SplFileObject($path);
-                $finfo = finfo_open();
+    private function __instantiateMessagesClass(){
+        $this->messages_class_obj = new Messages($this->ews);
 
-                $attachment = new FileAttachmentType();
-                $attachment->Content = $file->openFile()->fread($file->getSize());
-                $attachment->Name = $file->getBasename();
-                $attachment->ContentType = finfo_file($finfo, $path);
-
-                $attach_request->Attachments->FileAttachment[] = $attachment;
-            }
-        }
-
-        else{
-            $file = new \SplFileObject($files);
-            $finfo = finfo_open();
-
-            $attachment = new FileAttachmentType();
-            $attachment->Content = $file->openFile()->fread($file->getSize());
-            $attachment->Name = $file->getBasename();
-            $attachment->ContentType = finfo_file($finfo, $files);
-            
-            $attach_request->Attachments->FileAttachment[] = $attachment;
-        }
-
-        //Attach the file to the message
-        $attach_response = $this->ews->CreateAttachment($attach_request);
-		
-		//Get and return the new change key
-		return $attach_response->ResponseMessages->CreateAttachmentResponseMessage[0]->Attachments->FileAttachment[0]->AttachmentId->RootItemChangeKey;
-    }
-
-    /*
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    */
-
-    /**
-     * Send a message from draft
-     */
-    private function __sendSavedMsg($message_id, $change_key){
-        //SEND THE MESSAGE
-        $send_request = new SendItemType();
-        $send_request->SaveItemToFolder = true;
-        $send_request->ItemIds = new NonEmptyArrayOfBaseItemIdsType();
-        
-        // Add the message to the request.
-        $item = new ItemIdType();
-        $item->Id = $message_id;
-        $item->ChangeKey = $change_key;
-        $send_request->ItemIds->ItemId[] = $item;
-        
-        // Configure the folder to save the sent message to.
-        $send_folder = new TargetFolderIdType();
-        $send_folder->DistinguishedFolderId = new DistinguishedFolderIdType();
-        $send_folder->DistinguishedFolderId->Id = DistinguishedFolderIdNameType::SENT;
-		
-        $send_request->SavedItemFolderId = $send_folder;
-        
-        //SEND
-        $sent_response = $this->ews->SendItem($send_request);
-		
-		//get response message
-		$response_messages = $sent_response->ResponseMessages->SendItemResponseMessage;
-		
-		//return success or failure
-		return $response_messages[0]->ResponseClass == ResponseClassType::SUCCESS;
-    }
-
-    /*
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    */
-
-    private function __instantiateFoldersClass(){
-        $this->folders = new Folders($this->ews);
-
-        $this->folders->limit = $this->limit;
-    }
-
-    /*
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    ********************************************************************************************************************************
-    */
-
-    private function __updateMessageReadStatus(string $message_id, string $change_key, string $read_status){
-        $request = new UpdateItemType();
-        $request->MessageDisposition = 'SaveOnly';
-        $request->ConflictResolution = 'AlwaysOverwrite';
-        $request->ItemChanges = [];
-
-        $change = new ItemChangeType();
-        $change->ItemId = new ItemIdType();
-        $change->ItemId->Id = $message_id;
-        $change->ItemId->ChangeKey = $change_key;
-
-        $field = new SetItemFieldType();
-        $field->FieldURI = new PathToUnindexedFieldType();
-        $field->FieldURI->FieldURI = 'message:IsRead';
-        $field->Message = new MessageType();
-        $field->Message->IsReadSpecified = $read_status == 'read' ? TRUE : FALSE;
-        $field->Message->IsRead = $read_status == 'read' ? TRUE : FALSE;
-
-        $change->Updates->SetItemField[] = $field;
-
-        $request->ItemChanges[] = $change;
-
-        $response = $this->ews->UpdateItem($request);
-        
-        return $response->ResponseMessages->UpdateItemResponseMessage[0]->ResponseClass == ResponseClassType::SUCCESS;
+        $this->messages_class_obj->limit = $this->limit;
     }
 
     /*
@@ -500,7 +362,9 @@ class PhpEwsWrapper {
             //attach files to the created message
             $message_id = $this->__getCreatedMessageId();
 
-            $this->__attachFiles($message_id, $this->attach);
+            $this->__instantiateMessagesClass();
+
+            $this->messages_class_obj->attachFiles($message_id, $this->attach);
         }
     }
 
@@ -518,7 +382,9 @@ class PhpEwsWrapper {
      * @param string $change_key
      */
     public function sendMessage(string $message_id, string $change_key){
-        return $this->__sendSavedMsg($message_id, $change_key);
+        $this->__instantiateMessagesClass();
+
+        return $this->messages_class_obj->sendSavedMsg($message_id, $change_key);
     }
 
     /*
@@ -534,9 +400,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getInboxMessages(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::INBOX);
+        return $this->messages_class_obj->getMessages($page_number, DistinguishedFolderIdNameType::INBOX);
     }
 
     /*
@@ -552,9 +418,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getUnreadMessages(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getUnreadMessages($page_number);
+        return $this->messages_class_obj->getUnreadMessages($page_number);
     }
 
     /*
@@ -570,9 +436,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getSentItems(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::SENT);
+        return $this->messages_class_obj->getMessages($page_number, DistinguishedFolderIdNameType::SENT);
     }
 
     /*
@@ -588,9 +454,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getDraftItems(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::DRAFTS);
+        return $this->messages_class_obj->getMessages($page_number, DistinguishedFolderIdNameType::DRAFTS);
     }
 
     /*
@@ -606,9 +472,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getOutboxItems(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::OUTBOX);
+        return $this->messages_class_obj->getMessages($page_number, DistinguishedFolderIdNameType::OUTBOX);
     }
 
     /*
@@ -624,9 +490,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getFavourites(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::FAVORITES);
+        return $this->messages_class_obj->getMessages($page_number, DistinguishedFolderIdNameType::FAVORITES);
     }
 
     /*
@@ -642,9 +508,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getConversationHistory(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::CONVERSATION_HISTORY);
+        return $this->messages_class_obj->getMessages($page_number, DistinguishedFolderIdNameType::CONVERSATION_HISTORY);
     }
 
     /*
@@ -660,9 +526,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getJunkItems(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::JUNK);
+        return $this->messages_class_obj->getMessages($page_number, DistinguishedFolderIdNameType::JUNK);
     }
 
     /*
@@ -678,9 +544,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getDeletedMessages(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::DELETED);
+        return $this->messages_class_obj->getMessages($page_number, DistinguishedFolderIdNameType::DELETED);
     }
 
     /*
@@ -696,9 +562,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getArchivedMessages(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getMessages($page_number, DistinguishedFolderIdNameType::ARCHIVE_INBOX);
+        return $this->messages_class_obj->getMessages($page_number, DistinguishedFolderIdNameType::ARCHIVE_INBOX);
     }
 
     /*
@@ -714,9 +580,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getTasks(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getTasks($page_number);
+        return $this->messages_class_obj->getTasks($page_number);
     }
 
     /*
@@ -732,9 +598,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getContacts(int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getContacts($page_number);
+        return $this->messages_class_obj->getContacts($page_number);
     }
 
     /*
@@ -751,9 +617,9 @@ class PhpEwsWrapper {
      * @param int $page_number
      */
     public function getCustomFolderItems($folder_id, int $page_number=1){
-        $this->__instantiateFoldersClass();
+        $this->__instantiateMessagesClass();
         
-        return $this->folders->getMessages($page_number, $folder_id);
+        return $this->messages_class_obj->getMessages($page_number, $folder_id);
     }
 
     /*
@@ -770,7 +636,9 @@ class PhpEwsWrapper {
      * @param string $change_key
      */
     public function markAsRead(string $message_id, string $change_key){
-        return $this->__updateMessageReadStatus($message_id, $change_key, 'read');
+        $this->__instantiateMessagesClass();
+
+        return $this->messages_class_obj->updateMessageReadStatus($message_id, $change_key, 'read');
     }
 
     /*
@@ -787,6 +655,26 @@ class PhpEwsWrapper {
      * @param string $change_key
      */
     public function markAsUnread(string $message_id, string $change_key){
-        return $this->__updateMessageReadStatus($message_id, $change_key, 'unread');
+        $this->__instantiateMessagesClass();
+
+        return $this->messages_class_obj->updateMessageReadStatus($message_id, $change_key, 'unread');
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    /**
+     * Delete message
+     * @param string $message_id
+     */
+    public function deleteMessage(string $message_id){
+        $this->__instantiateMessagesClass();
+
+        return $this->messages_class_obj->deleteMessage($message_id);
     }
 }
