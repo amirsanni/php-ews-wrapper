@@ -612,14 +612,12 @@ class PhpEwsWrapper {
     */
 
     /**
-     * Get messages from other folders you created
-     * @param string $folder_id
-     * @param int $page_number
+     * Get list of folders
      */
-    public function getCustomFolderItems($folder_id, int $page_number=1){
+    public function getFolders(){
         $this->__instantiateMessagesClass();
         
-        return $this->messages_class_obj->getMessages($page_number, $folder_id);
+        return $this->messages_class_obj->getFolders();
     }
 
     /*
