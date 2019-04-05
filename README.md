@@ -14,6 +14,8 @@ composer require amirsanni/php-ews-wrapper
 * Send Messages in Draft
 * Get Inbox Messages
 * Get Unread Messages
+* Change Message Read Status
+* Delete Message
 * Get Sent Items
 * Get Outbox Items
 * Get Draft Items
@@ -24,7 +26,6 @@ composer require amirsanni/php-ews-wrapper
 * Get Junk Messages
 * Get Tasks
 * Get Conversation History
-* Change Message Read Status
 
 
 # How to use
@@ -122,5 +123,22 @@ if($items->status === 1 && $items->messages){
 }
 
 ```
+
+
+## Delete Messages
+```
+$mail->limit = 30;
+
+$items = $mail->getInboxMessages();
+
+if($items->status === 1 && $items->messages){
+    foreach($items->messages as $item){
+        $mail->deleteMessage($item->message_id);
+    }
+}
+
+```
+
+Check out the examples folder for more usage information  
 
 Check out the examples folder for more usage information  
