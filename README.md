@@ -27,6 +27,7 @@ composer require amirsanni/php-ews-wrapper
 * Get Junk Messages
 * Get Tasks
 * Get Conversation History
+* Get Folders List
 
 
 # How to use
