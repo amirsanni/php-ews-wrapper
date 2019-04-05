@@ -26,6 +26,9 @@ use jamesiarmes\PhpEws\Type\PathToUnindexedFieldType;
 use jamesiarmes\PhpEws\Type\MessageType;
 use jamesiarmes\PhpEws\Request\DeleteItemType;
 use jamesiarmes\PhpEws\Enumeration\DisposalType;
+use jamesiarmes\PhpEws\Request\FindFolderType;
+use jamesiarmes\PhpEws\Enumeration\FolderQueryTraversalType;
+use jamesiarmes\PhpEws\Type\FolderResponseShapeType;
 
 
 
@@ -113,6 +116,42 @@ class Messages{
         else{
             return $response_msg->ResponseMessages->GetItemResponseMessage->MessageText;
         }
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    public function getFolders(){
+        $request = new FindFolderType();
+        $request->Traversal = FolderQueryTraversalType::DEEP;
+        $request->FolderShape = new FolderResponseShapeType();
+        $request->FolderShape->BaseShape = DefaultShapeNamesType::ALL_PROPERTIES;
+
+        // configure the view
+        $request->IndexedPageFolderView = new IndexedPageViewType();
+        $request->IndexedPageFolderView->BasePoint = 'Beginning';
+        $request->IndexedPageFolderView->Offset = 0;
+
+        $request->ParentFolderIds = new NonEmptyArrayOfBaseFolderIdsType();
+
+        // use a distinguished folder name to find folders inside it
+        $request->ParentFolderIds->DistinguishedFolderId = new DistinguishedFolderIdType();
+        $request->ParentFolderIds->DistinguishedFolderId->Id = DistinguishedFolderIdNameType::MESSAGE_ROOT;
+
+        // if you know exact folder id, then use this piece of code instead. For example
+        // $folder_id = 'AAKkADE4N2NkZDRjLWZjY2EtNDNlFy04MjFlLTkzODAyXTMyMGVmOABGAAAAAACO4PBzuy...';
+        // $request->ParentFolderIds->FolderId = new FolderIdType();
+        // $request->ParentFolderIds->FolderId->Id = $folder_id;
+
+        // request
+        $response = $this->ews->FindFolder($request);
+
+        return $response;
     }
 
     /*
