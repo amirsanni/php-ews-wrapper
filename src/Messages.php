@@ -143,15 +143,37 @@ class Messages{
         $request->ParentFolderIds->DistinguishedFolderId = new DistinguishedFolderIdType();
         $request->ParentFolderIds->DistinguishedFolderId->Id = DistinguishedFolderIdNameType::MESSAGE_ROOT;
 
-        // if you know exact folder id, then use this piece of code instead. For example
-        // $folder_id = 'AAKkADE4N2NkZDRjLWZjY2EtNDNlFy04MjFlLTkzODAyXTMyMGVmOABGAAAAAACO4PBzuy...';
-        // $request->ParentFolderIds->FolderId = new FolderIdType();
-        // $request->ParentFolderIds->FolderId->Id = $folder_id;
-
         // request
         $response = $this->ews->FindFolder($request);
 
-        return $response;
+        $res = new \stdClass();
+
+        if($response->ResponseMessages->FindFolderResponseMessage[0]->ResponseClass == ResponseClassType::SUCCESS){
+            $retrieved_folders = $response->ResponseMessages->FindFolderResponseMessage[0]->RootFolder->Folders->Folder;
+
+            $folders = [];
+
+            foreach($retrieved_folders as $f){
+                $det = new \stdClass();
+
+                $det->name = $f->DisplayName;
+                $det->id = $f->FolderId->Id;
+
+                array_push($folders, $det);
+            }
+
+            $res->folders = $folders;
+            $res->msg = 'success';
+            $res->status = 1;
+        }
+
+        else{
+            $res->status = 0;
+            $res->msg = $response->ResponseMessages->FindFolderResponseMessage[0]->MessageText;
+            $res->folders = [];
+        }
+
+        return $res;
     }
 
     /*
