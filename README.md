@@ -142,5 +142,3 @@ if($items->status === 1 && $items->messages){
 ```
 
 Check out the examples folder for more usage information  
-
-Check out the examples folder for more usage information  
