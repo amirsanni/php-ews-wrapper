@@ -1,5 +1,6 @@
 # php-ews-wrapper
-A simple wrapper for jamesiarmes/php-ews library
+This is a library for communicating with Exchange Web Service. It provides a very simple and easy to use API,
+leveraging on jamesiarmes/php-ews library. 
 
 
 # Installation
