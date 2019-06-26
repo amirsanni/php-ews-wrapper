@@ -42,6 +42,8 @@ class PhpEwsWrapper {
     protected $messages_class_obj;
     public $limit;
 
+    public $event;
+
     /*
     ********************************************************************************************************************************
     ********************************************************************************************************************************
@@ -55,6 +57,9 @@ class PhpEwsWrapper {
             $this->__setVersion($version);
             $this->ews = new Client($server, $email, $password, $this->version);
             $this->sender = $email;
+
+            //instantiate events class
+            $this->events = new Events($this->ews);
         }
 
         catch(Exception $e){
