@@ -1,16 +1,6 @@
 <?php
 namespace amirsanni\phpewswrapper;
 
-<<<<<<< HEAD
-class Events{
-    protected $ews;
-    protected $event_start;
-    protected $event_end;
-    protected $location;
-    protected $subject;
-    protected $busy;
-    protected $invitees_email;
-=======
 use jamesiarmes\PhpEws\Type\CalendarEventDetails;
 use jamesiarmes\PhpEws\Type\CalendarEvent;
 use jamesiarmes\PhpEws\Request\CreateItemType;
@@ -42,7 +32,6 @@ class Events{
     ********************************************************************************************************************************
     ********************************************************************************************************************************
     */
->>>>>>> 1.0
 
     public function __construct($ews_client){
         $this->ews = $ews_client;
