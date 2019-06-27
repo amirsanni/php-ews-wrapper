@@ -13,6 +13,7 @@ use jamesiarmes\PhpEws\Type\BodyType;
 use jamesiarmes\PhpEws\Type\AttendeeType;
 use jamesiarmes\PhpEws\Type\EmailAddressType;
 use jamesiarmes\PhpEws\Enumeration\RoutingType;
+use jamesiarmes\PhpEws\Enumeration\ResponseClassType;
 
 class Events{
     private $ews;
@@ -45,7 +46,7 @@ class Events{
     ********************************************************************************************************************************
     */
 
-    public function create(){        
+    public function create(){
         // Build the request,
         $this->request = new CreateItemType();
         $this->request->SendMeetingInvitations = CalendarItemCreateOrDeleteOperationType::SEND_TO_ALL_AND_SAVE_COPY;//SEND_ONLY_TO_ALL
@@ -83,6 +84,15 @@ class Events{
         // Add the event to the request.
         $this->request->Items->CalendarItem[] = $event;
         
-        print_r($this->ews->CreateItem($this->request));
+        $response = $this->ews->CreateItem($this->request);
+
+        if($response->ResponseMessages->CreateItemResponseMessage[0]->ResponseClass == ResponseClassType::SUCCESS){
+            return [
+                'event_id'=>$response->ResponseMessages->CreateItemResponseMessage[0]->Items->CalendarItem[0]->ItemId->Id,
+                'change_key'=>$response->ResponseMessages->CreateItemResponseMessage[0]->Items->CalendarItem[0]->ItemId->ChangeKey
+            ];
+        }
+
+        return FALSE;
     }
 }
