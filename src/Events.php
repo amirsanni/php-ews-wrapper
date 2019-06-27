@@ -37,34 +37,6 @@ class Events{
         $this->ews = $ews_client;
     }
 
-<<<<<<< HEAD
-
-
-    public function create(){
-        $request = new EWSType_CreateItemType();
-
-        $event_details = new EWSType_CalendarEventDetails();
-
-        $event = new EWSType_CalendarEvent();
-        $event->CalendarEventDetails = $event_details;
-
-        $event->Start = '2012-07-21T09:00:00+02:00';
-        $event->End = '2012-07-21T18:00:00+02:00';
-        $event->Subject = "Subject";
-        $event->Location = "Location";
-        $event->BusyType = "Busy";
-
-        $request->Items->CalendarItem[] = $event;
-        $request->SendMeetingInvitations = EWSType_CalendarItemCreateOrDeleteOperationType::SEND_TO_NONE;
-
-        $response = $ews->CreateItem($request);
-    }
-
-
-
-    public function sendInvite(){
-        //
-=======
     /*
     ********************************************************************************************************************************
     ********************************************************************************************************************************
@@ -112,6 +84,5 @@ class Events{
         $this->request->Items->CalendarItem[] = $event;
         
         print_r($this->ews->CreateItem($this->request));
->>>>>>> 1.0
     }
 }
