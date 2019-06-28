@@ -23,7 +23,7 @@ class Events{
     public $timezone;
     public $location;
     public $subject;
-    public $event_body;
+    public $description;
     public $invitees;
 
     /*
@@ -66,7 +66,7 @@ class Events{
 
         // Set the event body.
         $event->Body = new BodyType();
-        $event->Body->_ = $this->event_body;
+        $event->Body->_ = $this->description;
         $event->Body->BodyType = BodyTypeType::HTML;
 
         // Add invitees if there are any
@@ -93,6 +93,6 @@ class Events{
             ];
         }
 
-        return FALSE;
+        return "Unable to create event";
     }
 }
