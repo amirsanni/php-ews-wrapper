@@ -1,2 +1,6 @@
 Test.php
+<<<<<<< HEAD
 /vendor
+=======
+/vendor/
+>>>>>>> 1.1

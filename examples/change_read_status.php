@@ -3,14 +3,15 @@ require "vendor/autoload.php";
 
 use amirsanni\phpewswrapper\PhpEwsWrapper;
 
-$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optionalVersion');
+$ews = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optionalVersion');
 
-$mail->limit = 50;
+$ews->mail->limit = 10;
 
-$items = $mail->getInboxMessages();//$mail->getUnreadMessages()
+$items = $ews->mail->inbox();//$ews->mail->unread()
 
 if($items->status === 1 && $items->messages){
     foreach($items->messages as $item){
-        $mail->markAsRead($item->message_id, $item->change_key);//$mail->markAsUnread($item->message_id, $item->change_key);
+        $ews->mail->markAsRead($item->message_id, $item->change_key);
+        //$ews->mail->markAsUnread($item->message_id, $item->change_key);
     }
 }
