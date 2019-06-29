@@ -1,5 +1,5 @@
 <?php
-namespace amirsanni\phpewswrapper;
+namespace amirsanni\phpewswrapper\Calendar;
 
 use jamesiarmes\PhpEws\Type\CalendarEventDetails;
 use jamesiarmes\PhpEws\Type\CalendarEvent;
