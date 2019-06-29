@@ -36,7 +36,7 @@ composer require amirsanni/php-ews-wrapper
 ```
 use amirsanni\phpewswrapper\PhpEwsWrapper;
 
-$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optionalVersion');
+$ews = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optionalVersion');
 ```
 
 **Note:** Server address defaults to _outlook.office365.com_  
@@ -46,66 +46,82 @@ $mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optiona
 
 ## Send Email
 ```
-$mail->sender_name = "John Doe";
-$mail->subject = "Test email";
-$mail->message = "This is a test email";
-$mail->recipient = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
-$mail->recipient_name = "Amir Sanni";
-$mail->cc = ['abc@xyz.com', 'abc@example.com']; //'abc@example.com'
-$mail->bcc = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
-$mail->attach = ['file1', 'file2', 'file3']; //'file'
-$mail->send_as_email = 'abc@xyz.com';
+$ews->mail->sender_name = "John Doe";
+$ews->mail->subject = "Test email";
+$ews->mail->body = "This is a test email";
+$ews->mail->recipient = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
+$ews->mail->recipient_name = "Amir Sanni";
+$ews->mail->cc = ['abc@xyz.com', 'abc@example.com']; //'abc@example.com'
+$ews->mail->bcc = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
+$ews->mail->attach = ['file1', 'file2', 'file3']; //'file'
+$ews->mail->send_as_email = 'abc@xyz.com';
 
-$mail->send();  
+$ews->mail->send();  
 ```
 
 
 
 ## Create Draft
 ```
-$mail->sender_name = "Foo Bar";
-$mail->subject = "Test email";
-$mail->message = "This is a test email";
-$mail->recipient = 'abc@example.com'; //['abc@xyz.com', 'john.doe@example.com']
-$mail->recipient_name = "Amir Sanni";
-$mail->cc = ['abc@xyz.com', 'abc@example.com']; //'abc@example.com'
-$mail->bcc = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
-$mail->attach = ['file1', 'file2', 'file3']; //'file'
-$mail->send_as_email = 'abc@xyz.com';
+$ews->mail->sender_name = "Foo Bar";
+$ews->mail->subject = "Test email";
+$ews->mail->body = "This is a test email";
+$ews->mail->recipient = 'abc@example.com'; //['abc@xyz.com', 'john.doe@example.com']
+$ews->mail->recipient_name = "Amir Sanni";
+$ews->mail->cc = ['abc@xyz.com', 'abc@example.com']; //'abc@example.com'
+$ews->mail->bcc = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
+$ews->mail->attach = ['file1', 'file2', 'file3']; //'file'
+$ews->mail->send_as_email = 'abc@xyz.com';
 
-$mail->createDraft();  
+$mail->save();  
 ```
 
 
 
 ## Get Messages
 ```
-$mail->limit = 30;
+$ews->mail->limit = 30;
 
 //each of the methods takes an optional page_number of type int
-$mail->getInboxMessages();//Messages in inbox
-$mail->getSentItems(3);
-$mail->getDraftItems();
-$mail->getOutboxItems(1);
-$mail->getConversationHistory();
-$mail->getFavourites();
-$mail->getJunkItems();
-$mail->getDeletedMessages();
-$mail->getArchivedMessages();
-$mail->getContacts();
-$mail->getTasks();  
+$ews->mail->inbox();//Messages in inbox
+$ews->mail->sent(3);
+$ews->mail->draft();
+$ews->mail->outbox(1);
+$ews->mail->conversationHistory();
+$ews->mail->favourites();//favorites() will also work
+$ews->mail->junk();
+$ews->mail->deleted();
+$ews->mail->archived();
+$ews->contacts->get();
+$ews->tasks->get();  
+```
+
+## Get Contacts
+```
+$ews->contacts->limit = 10;
+
+//Method takes an optional 'pageNumber' of type int
+$res = $ews->contacts->get(); 
+```
+
+## Get Tasks
+```
+$ews->tasks->limit = 10;
+
+//Method takes an optional 'pageNumber' of type int
+$res = $ews->tasks->get();  
 ```
 
 
 ## Send Message From Draft
 ```
-$mail->limit = 30;
+$ews->mail->limit = 30;
 
-$draft_items = $mail->getDraftItems();
+$draft_items = $ews->mail->draft();
 
 if($draft_items->status === 1 && $draft_items->messages){
     foreach($draft_items->messages as $item){
-        $mail->sendMessage($item->message_id, $item->change_key);
+        $ews->mail->send($item->message_id, $item->change_key);
     }
 }
 
@@ -114,13 +130,14 @@ if($draft_items->status === 1 && $draft_items->messages){
 
 ## Change Message Read Status
 ```
-$mail->limit = 30;
+$ews->mail->limit = 30;
 
-$items = $mail->getInboxMessages();//$mail->getUnreadMessages()
+$items = $ews->mail->inbox();//$ews->mail->unread()
 
 if($items->status === 1 && $items->messages){
     foreach($items->messages as $item){
-        $mail->markAsRead($item->message_id, $item->change_key);//$mail->markAsUnread($item->message_id, $item->change_key);
+        $ews->mail->markAsRead($item->message_id, $item->change_key);
+        //$ews->mail->markAsUnread($item->message_id, $item->change_key);
     }
 }
 
@@ -129,15 +146,33 @@ if($items->status === 1 && $items->messages){
 
 ## Delete Messages
 ```
-$mail->limit = 30;
+$ews->mail->limit = 30;
 
-$items = $mail->getInboxMessages();
+$items = $ews->mail->inbox();
 
 if($items->status === 1 && $items->messages){
     foreach($items->messages as $item){
-        $mail->deleteMessage($item->message_id);
+        $ews->mail->delete($item->message_id);
     }
 }
+
+```
+
+
+## Create Calendar Event
+```
+$ews->events->event_start = '2019-06-27 08:00:00';
+$ews->events->event_end = '2019-06-27 10:00:00';
+$ews->events->timezone = 'Africa/Lagos';//Any PHP Timezone
+$ews->events->location = 'Fabac, VI, Lagos';
+$ews->events->subject = 'Test';
+$ews->events->event_body = 'This is a test event';
+$ews->events->invitees = [
+    ['name'=>'John Doe', 'email'=>'john.doe@example.com'],
+    ['name'=>'Foo Bar', 'email'=>'foo.bar@example.com']
+];
+
+$res = $ews->events->create();
 
 ```
 
