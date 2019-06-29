@@ -28,6 +28,7 @@ composer require amirsanni/php-ews-wrapper
 * Get Tasks
 * Get Conversation History
 * Get Folders List
+* Create event
 
 
 # How to use
