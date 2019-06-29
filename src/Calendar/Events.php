@@ -1,19 +1,17 @@
 <?php
 namespace amirsanni\phpewswrapper\Calendar;
 
-use jamesiarmes\PhpEws\Type\CalendarEventDetails;
-use jamesiarmes\PhpEws\Type\CalendarEvent;
-use jamesiarmes\PhpEws\Request\CreateItemType;
-use jamesiarmes\PhpEws\Enumeration\CalendarItemCreateOrDeleteOperationType;
-use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfAllItemsType;
-use jamesiarmes\PhpEws\Type\CalendarItemType;
-use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfAttendeesType;
-use jamesiarmes\PhpEws\Enumeration\BodyTypeType;
 use jamesiarmes\PhpEws\Type\BodyType;
 use jamesiarmes\PhpEws\Type\AttendeeType;
+use jamesiarmes\PhpEws\Type\CalendarItemType;
 use jamesiarmes\PhpEws\Type\EmailAddressType;
+use jamesiarmes\PhpEws\Request\CreateItemType;
 use jamesiarmes\PhpEws\Enumeration\RoutingType;
+use jamesiarmes\PhpEws\Enumeration\BodyTypeType;
 use jamesiarmes\PhpEws\Enumeration\ResponseClassType;
+use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfAllItemsType;
+use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfAttendeesType;
+use jamesiarmes\PhpEws\Enumeration\CalendarItemCreateOrDeleteOperationType;
 
 class Events{
     private $ews;

@@ -3,14 +3,14 @@ require "vendor/autoload.php";
 
 use amirsanni\phpewswrapper\PhpEwsWrapper;
 
-$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optionalVersion');
+$ews = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optionalVersion');
 
-$mail->limit = 1;
+$ews->mail->limit = 3;
 
-$items = $mail->getInboxMessages();
+$items = $ews->mail->inbox();
 
 if($items->status === 1 && $items->messages){
     foreach($items->messages as $item){
-        $mail->deleteMessage($item->message_id);
+        $ews->mail->delete($item->message_id);
     }
 }

@@ -3,9 +3,9 @@ require "vendor/autoload.php";
 
 use amirsanni\phpewswrapper\PhpEwsWrapper;
 
-$mail = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optionalVersion');
+$ews = new PhpEwsWrapper('email', 'password', 'optionalServerAddress', 'optionalVersion');
 
-$items = $mail->getFolders();
+$items = $ews->folders->get();
 
 if($items->status === 1 && $items->folders){
     foreach($items->folders as $folder){

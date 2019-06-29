@@ -1,27 +1,38 @@
 <?php
 namespace amirsanni\phpewswrapper\Messages;
 
+use amirsanni\phpewswrapper\Folders;
 use jamesiarmes\PhpEws\Type\BodyType;
 use jamesiarmes\PhpEws\Type\ItemIdType;
 use jamesiarmes\PhpEws\Type\MessageType;
+use jamesiarmes\PhpEws\Request\GetItemType;
 use jamesiarmes\PhpEws\Type\ItemChangeType;
+use jamesiarmes\PhpEws\Request\SendItemType;
 use jamesiarmes\PhpEws\Type\EmailAddressType;
 use jamesiarmes\PhpEws\Type\SetItemFieldType;
 use jamesiarmes\PhpEws\Request\CreateItemType;
 use jamesiarmes\PhpEws\Request\DeleteItemType;
 use jamesiarmes\PhpEws\Request\UpdateItemType;
 use jamesiarmes\PhpEws\Type\FileAttachmentType;
+use jamesiarmes\PhpEws\Type\TargetFolderIdType;
 use jamesiarmes\PhpEws\Enumeration\DisposalType;
 use jamesiarmes\PhpEws\Type\SingleRecipientType;
+use jamesiarmes\PhpEws\Type\ItemResponseShapeType;
 use jamesiarmes\PhpEws\Request\CreateAttachmentType;
+use jamesiarmes\PhpEws\Enumeration\ResponseClassType;
 use jamesiarmes\PhpEws\Type\PathToUnindexedFieldType;
+use jamesiarmes\PhpEws\Type\DistinguishedFolderIdType;
 use jamesiarmes\PhpEws\ArrayType\ArrayOfRecipientsType;
+use jamesiarmes\PhpEws\Enumeration\DefaultShapeNamesType;
 use jamesiarmes\PhpEws\Enumeration\MessageDispositionType;
 use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfAllItemsType;
 use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfAttachmentsType;
 use jamesiarmes\PhpEws\ArrayType\NonEmptyArrayOfBaseItemIdsType;
+use jamesiarmes\PhpEws\Enumeration\DistinguishedFolderIdNameType;
 
 class Message{
+    private $folder;
+
     protected $ews;
     protected $msg;
     protected $request;
@@ -36,6 +47,7 @@ class Message{
     */
 
     public function __construct($ews){
+        $this->folder = new Folders($ews);
         $this->ews = $ews;
         $this->msg = new MessageType();
     }    
@@ -312,6 +324,93 @@ class Message{
 		
 		//return success or failure
 		return $response_messages[0]->ResponseClass == ResponseClassType::SUCCESS;
+    }
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    protected function getMessages(int $page_number, string $folder_name, int $limit){
+        $response = $this->folder->getItems($page_number, $folder_name, $limit);
+
+        $res = new \stdClass();
+
+        //format the response by returning specific fields
+        if($response[0]->ResponseClass == ResponseClassType::SUCCESS){
+            //proceed
+            $messages = [];
+            $retrieved_messages = $response[0]->RootFolder->Items->Message;
+
+            foreach($retrieved_messages as $msg){
+                $msg_info = $this->getMessageDetails($msg->ItemId->Id);
+
+                $det = new \stdClass();
+
+                $det->message_id = $msg->ItemId->Id;
+                $det->change_key = $msg->ItemId->ChangeKey;
+                $det->subject = $msg->Subject;
+                $det->sender = $msg_info->Sender->Mailbox->EmailAddress ? $msg_info->Sender->Mailbox->EmailAddress : $msg_info->From->Mailbox->EmailAddress;
+                $det->recipients = $msg_info->ToRecipients && $msg_info->ToRecipients->Mailbox ? implode(", ", array_column($msg_info->ToRecipients->Mailbox, 'EmailAddress')) : "";
+                $det->cc = $msg_info->CcRecipients && $msg_info->CcRecipients->Mailbox ? implode(", ", array_column($msg_info->CcRecipients->Mailbox, 'EmailAddress')) : "";
+                $det->bcc = $msg_info->BccRecipients && $msg_info->BccRecipients->Mailbox ? implode(", ", array_column($msg_info->BccRecipients->Mailbox, 'EmailAddress')) : "";
+                $det->date_sent = $msg->DateTimeSent;
+                $det->date_received = $msg->DateTimeReceived;
+                $det->flagged = (int)($msg->Flag->FlagStatus != "NotFlagged");
+                $det->attachments = $msg_info->Attachments && $msg_info->Attachments->FileAttachment ? implode(", ", array_column($msg_info->Attachments->FileAttachment, 'Name')) : "";
+                $det->is_read = $msg_info->IsRead;
+                $det->message = $msg_info->Body->_;
+
+                array_push($messages, $det);
+            }
+
+            $res->messages = $messages;
+            $res->status = 1;
+            $res->msg = "success";
+        }
+
+        else{
+            $res->msg = $response[0]->ResponseCode.": ".$response[0]->MessageText;
+            $res->status = 0;
+            $res->messages = '';
+        }
+
+        return $res;
+    }    
+
+    /*
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    ********************************************************************************************************************************
+    */
+
+    private function getMessageDetails($message_id){
+        $fetch_request = new GetItemType();
+
+        $fetch_request->ItemShape = new ItemResponseShapeType();
+        $fetch_request->ItemShape->BaseShape = DefaultShapeNamesType::ALL_PROPERTIES;
+
+        $item = new ItemIdType();
+        $item->Id = $message_id;
+        $fetch_request->ItemIds->ItemId[] = $item;
+        
+        //GET
+        $response = $this->ews->GetItem($fetch_request);
+        
+        $response_msg = $response->ResponseMessages->GetItemResponseMessage[0];
+
+        if($response_msg->ResponseClass == 'Success'){
+            return $response_msg->Items->Message[0];
+        }
+
+        else{
+            return $response_msg->ResponseMessages->GetItemResponseMessage->MessageText;
+        }
     }
 
     /*
