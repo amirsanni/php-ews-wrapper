@@ -55,7 +55,7 @@ $ews->mail->recipient_name = "Amir Sanni";
 $ews->mail->cc = ['abc@xyz.com', 'abc@example.com']; //'abc@example.com'
 $ews->mail->bcc = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
 $ews->mail->attach = ['file1', 'file2', 'file3']; //'file'
-$ews->mail->send_as_email = 'abc@xyz.com';
+$ews->mail->send_as_email = 'abc@xyz.com';//to send as another user, not the logged in user. Optional
 
 $ews->mail->send();  
 ```
@@ -74,7 +74,7 @@ $ews->mail->bcc = 'abc@example.com'; //['abc@xyz.com', 'abc@example.com']
 $ews->mail->attach = ['file1', 'file2', 'file3']; //'file'
 $ews->mail->send_as_email = 'abc@xyz.com';
 
-$mail->save();  
+$ews->mail->save();  
 ```
 
 
@@ -93,8 +93,6 @@ $ews->mail->favourites();//favorites() will also work
 $ews->mail->junk();
 $ews->mail->deleted();
 $ews->mail->archived();
-$ews->contacts->get();
-$ews->tasks->get();  
 ```
 
 ## Get Contacts
