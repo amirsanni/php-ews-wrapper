@@ -360,7 +360,7 @@ class Message{
                 $det->date_sent = $msg->DateTimeSent;
                 $det->date_received = $msg->DateTimeReceived;
                 $det->flagged = (int)($msg->Flag->FlagStatus != "NotFlagged");
-                $det->attachments = $msg_info->Attachments && $msg_info->Attachments->FileAttachment ? implode(", ", array_column($msg_info->Attachments->FileAttachment, 'Name')) : "";
+                $det->attachments = $msg_info->Attachments && $msg_info->Attachments->FileAttachment ? $msg_info->Attachments->FileAttachment : "";
                 $det->is_read = $msg_info->IsRead;
                 $det->message = $msg_info->Body->_;
 
