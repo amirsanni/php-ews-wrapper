@@ -399,7 +399,7 @@ class Message{
 
         $item = new ItemIdType();
         $item->Id = $message_id;
-        $fetch_request->ItemIds->ItemId[] = $item;
+        $fetch_request->ItemIds = (object)['ItemId' => [$item]];
         
         //GET
         $response = $this->ews->GetItem($fetch_request);
@@ -441,7 +441,7 @@ class Message{
         $field->Message->IsReadSpecified = $read_status == 'read' ? TRUE : FALSE;
         $field->Message->IsRead = $read_status == 'read' ? TRUE : FALSE;
 
-        $change->Updates->SetItemField[] = $field;
+        $change->Updates = (object)['SetItemField'=> [$field]];
 
         $request->ItemChanges[] = $change;
 
